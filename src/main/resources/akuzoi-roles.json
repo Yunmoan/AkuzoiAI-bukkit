@@ -1,0 +1,10 @@
+{
+  "qing": {
+    "name": ["小奏", "清", "Akuzoi"],
+    "id": "qing"
+  },
+  "default": {
+    "name": ["AkuzoiAI"],
+    "id": "qing"
+  }
+}

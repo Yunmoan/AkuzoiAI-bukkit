@@ -1,0 +1,167 @@
+# AkuzoiAI 配置
+# 版本 9：新增系统广播消息概率触发与主动触发公开显示控制
+config-version: 9
+
+messages:
+  locale: zh_CN
+  plugin-name: AkuzoiAI
+  plugin-description: "Using AI chat plugin for Paper/Spigot 1.20+"
+  command:
+    player-only: "Only players can use this command."
+    usage: "/ai <message>"
+    admin:
+      usage: "/akuzoiai <reload|clear|info>"
+      reloaded: "AkuzoiAI reloaded."
+      clear:
+        self: "Your AI memory has been cleared."
+        all: "All AI memories cleared."
+        global: "Global AI memory cleared."
+        player: "AI memory cleared for {player}."
+        player-offline: "Player is not online: {player}"
+        no-permission-shared: "You do not have permission to clear shared memory in the current memory mode."
+        no-permission-global: "You do not have permission to clear global memory."
+        no-permission-player: "You do not have permission to clear other players' memory."
+      info:
+        title: "AkuzoiAI info:"
+        version: "- version: {version}"
+        memory-mode: "- memory mode: {memoryMode}"
+        model: "- model: {model}"
+        base-url: "- base url: {baseUrl}"
+        debug: "- debug: {debug}"
+        log-replies: "- log replies to console: {value}"
+        thinking-visible: "- thinking visible: {value}"
+        time-enabled: "- time enabled: {value}"
+        time-zone: "- time zone: {timeZone}"
+        proactive-enabled: "- proactive enabled: {value}"
+        gift-enabled: "- gift enabled: {value}"
+  prompt:
+    proactive: "Please start a natural conversation with the player based on recent behavior: {behavior}"
+
+chat:
+  # 注意：AI 实际回复格式已强制为：<{显示名}> {message}（不可修改）
+  # 以下仅保留给“思考中/错误提示”等文本，不再控制最终回复格式
+  prefix: "&b[AkuzoiAI]&r "
+  thinking: "&7AI 正在思考..."
+  error: "&cAI 请求失败，请稍后再试。"
+  # 兼容旧版本保留，不生效
+  format: "&bAkuzoiAI &7>> &f{message}"
+
+actionbar:
+  # 当触发类型为 proactive / behavior 时的提示
+  enabled: true
+  thinking: "AI看了一眼"
+
+ai:
+  # custom: 使用你自己的 OpenAI-like 接口和 prompt
+  # akuzoi: 使用官方服务（忽略 ai.base-url / ai.api-key / trigger.names / prompt.system-file）
+  type: "custom"
+
+  # custom 模式配置
+  base-url: "https://api.openai.com/v1/chat/completions"
+  api-key: ""
+  model: "gpt-4o-mini"
+
+  # akuzoi 官方服务模式配置
+  # endpoint 固定为 https://api.zyghit.cn/akuzoiai/endpoint/{role}
+  # 这里只配置官方服务 key 与角色 ID
+  akuzoi:
+    api-key: ""
+    role: "qing"
+
+  # 公共请求参数
+  temperature: 0.7
+  max-tokens: 512
+  timeout-seconds: 30
+
+prompt:
+  # custom 模式读取 system-file + template-file
+  # akuzoi 模式不会读取 system-file（使用内置 system prompt）
+  system-file: "system-prompt.txt"
+  template-file: "prompt-template.txt"
+
+debug:
+  enabled: false
+  log-replies-to-console: true
+  show-thinking-message: true
+  think-tag-to-console: true
+
+time:
+  enabled: true
+  zone: "Asia/Shanghai"
+  format: "yyyy-MM-dd HH:mm:ss z"
+
+memory:
+  # player/global
+  mode: "player"
+  max-messages: 20
+  compression-enabled: true
+  compress-after-messages: 40
+  summary-max-tokens: 256
+
+trigger:
+  # 仅 custom 模式有效。akuzoi 模式下 AI 名称由内置角色映射决定。默认使用第一个做显示名字
+  names:
+    - "Akuzoi"
+    - "小奏"
+
+  command-enabled: true
+  random-chat-enabled: true
+  random-chat-probability: 0.05
+  random-chat-cooldown-seconds: 60
+
+proactive:
+  enabled: true
+  after-interaction-seconds: 180
+  cooldown-seconds: 600
+  probability: 0.35
+  # 主动触发（proactive）可见回复是否广播给全服（true=全服可见，false=仅触发玩家可见）
+  broadcast-visible-reply: true
+  # 主动触发（proactive）是否显示“正在思考”提示（聊天栏/actionbar 的提示）
+  show-thinking-message: false
+
+system-message:
+  # 是否允许 AI 响应系统广播消息（如成就、死亡、进出服广播）
+  enabled: true
+  # 系统广播消息触发概率
+  probability: 0.15
+  # 触发后是否显示“正在思考”提示
+  show-thinking-message: false
+
+location-lookup:
+  # 是否允许 AI 根据配置生成“查找玩家位置”的能力提示（实际位置能力需由代码受控实现）
+  enabled: false
+
+behavior:
+  # 行为触发概率（独立于 proactive.probability）
+  trigger-probability: 0.35
+  window-seconds: 8
+  retention-seconds: 30
+  record-movement: true
+  record-interact: true
+  record-entity-interact: true
+  record-item-held: true
+  actionbar-on-behavior-trigger: true
+  gift-on-explicit-request-boost: true
+
+gift:
+  enabled: true
+  trigger-token: "[[GIVE_ITEM]]"
+  # 礼物成功时显示给玩家的提示文本
+  success-message: "给你准备了一个小礼物：{gift_desc}。"
+  deny-failure-message: "物品在传输的过程中好像弄丢了。。。"
+  options:
+    - material: "minecraft.apple"
+      display-name: "苹果"
+      min-amount: 1
+      max-amount: 2
+      probability: 0.5
+    - material: "minecraft.bread"
+      display-name: "面包"
+      min-amount: 1
+      max-amount: 3
+      probability: 0.3
+    - material: "minecraft.torch"
+      display-name: "火把"
+      min-amount: 4
+      max-amount: 12
+      probability: 0.15

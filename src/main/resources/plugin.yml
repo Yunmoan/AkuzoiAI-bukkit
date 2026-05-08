@@ -1,0 +1,23 @@
+name: AkuzoiAI
+version: ${version}
+main: dev.akuzoi.ai.AkuzoiAIPlugin
+api-version: '1.20'
+author: Akuzoi
+description: ${description}
+commands:
+  ai:
+    description: Talk with AI
+    usage: /ai <message>
+    permission: akuzoiai.use
+  akuzoiai:
+    description: AkuzoiAI command
+    usage: /akuzoiai <reload|clear|info>
+    aliases: [akai]
+    permission: akuzoiai.use
+permissions:
+  akuzoiai.use:
+    description: Allows using AI chat
+    default: true
+  akuzoiai.admin:
+    description: Allows managing AkuzoiAI
+    default: op
