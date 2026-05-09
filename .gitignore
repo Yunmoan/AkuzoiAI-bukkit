@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+target/
+*.class
+
+# Logs
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code / Cursor
+.vscode/
+.cursor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated reports and temp files
+*.tmp
+*.temp

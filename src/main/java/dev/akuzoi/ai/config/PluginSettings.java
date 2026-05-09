@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import dev.akuzoi.ai.gift.GiftOption;
 
+// 插件运行时用到的参数都放在这里。
 public record PluginSettings(
         String aiType,
         String baseUrl,
@@ -16,6 +17,7 @@ public record PluginSettings(
         double temperature,
         int maxTokens,
         int timeoutSeconds,
+        boolean streamEnabled,
         String systemPromptFile,
         String templateFile,
         String akuzoiApiKey,
@@ -62,6 +64,7 @@ public record PluginSettings(
         String thinkingMessage,
         String errorMessage
 ) {
+    // 从配置文件里读出各项开关和参数。
     public static PluginSettings from(FileConfiguration config) {
         return new PluginSettings(
                 normalizeType(config.getString("ai.type", "custom")),
@@ -71,6 +74,7 @@ public record PluginSettings(
                 config.getDouble("ai.temperature", 0.7),
                 config.getInt("ai.max-tokens", 512),
                 config.getString("ai.timeout-seconds", "30").matches("\\d+") ? config.getInt("ai.timeout-seconds", 30) : 30,
+                config.getBoolean("ai.stream-enabled", false),
                 config.getString("prompt.system-file", "system-prompt.txt"),
                 config.getString("prompt.template-file", "prompt-template.txt"),
                 config.getString("ai.akuzoi.api-key", ""),
@@ -119,6 +123,7 @@ public record PluginSettings(
         );
     }
 
+    // 只有切到官方模式时，才会走那套固定入口。
     public boolean useAkuzoiOfficialService() {
         return "akuzoi".equals(aiType);
     }

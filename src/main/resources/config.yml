@@ -72,6 +72,8 @@ ai:
   temperature: 0.7
   max-tokens: 512
   timeout-seconds: 30
+  # 是否启用 SSE 流式输出。开启后会走 stream=true 请求，再在服务端拼接完整回复后发送。
+  stream-enabled: true
 
 prompt:
   # custom 模式读取 system-file + template-file

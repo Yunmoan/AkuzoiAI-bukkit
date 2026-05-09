@@ -27,8 +27,13 @@ import dev.akuzoi.ai.memory.ConversationMemory;
 import dev.akuzoi.ai.memory.MemoryManager;
 import dev.akuzoi.ai.prompt.PromptManager;
 
+/**
+ * 聊天服务入口，负责拼提示词、发请求，再把结果送回去。
+ */
 public final class AiChatService {
+    /** 把 think 标签里的内容单独拿出来。 */
     private static final Pattern THINK_PATTERN = Pattern.compile("<think>([\\s\\S]*?)</think>", Pattern.CASE_INSENSITIVE);
+    /** 识别位置查询标记，比如 [[LOCATE:PlayerName]]。 */
     private static final Pattern LOCATE_PATTERN = Pattern.compile("\\[\\[LOCATE:([^\\]]+)\\]\\]", Pattern.CASE_INSENSITIVE);
     private final JavaPlugin plugin;
     private final PluginSettings settings;
@@ -60,6 +65,14 @@ public final class AiChatService {
         requestReply(player, trigger, message, true);
     }
 
+    /**
+     * 发起一次回复请求。
+     *
+     * @param player 触发玩家，系统触发时可能为 null
+     * @param trigger 触发来源（chat/random/proactive/system 等）
+     * @param message 原始输入文本
+     * @param showThinking 是否先展示“思考中”提示
+     */
     public void requestReply(Player player, String trigger, String message, boolean showThinking) {
         String playerName = player == null ? "system" : player.getName();
         String userPrompt = promptManager.renderUserPrompt(trigger, playerName, message) + giftService.instructionPrompt(trigger, message);
@@ -82,7 +95,14 @@ public final class AiChatService {
             try {
                 compressIfNeeded(player);
                 List<ChatMessage> requestMessages = buildMessages(player, userPrompt);
-                String rawReply = aiClient.chat(requestMessages, settings.maxTokens());
+                String rawReply;
+                if (settings.streamEnabled()) {
+                    StringBuilder streamed = new StringBuilder();
+                    aiClient.chatStream(requestMessages, settings.maxTokens(), streamed::append);
+                    rawReply = streamed.toString();
+                } else {
+                    rawReply = aiClient.chat(requestMessages, settings.maxTokens());
+                }
                 String withLocation = applyLocationTool(rawReply);
                 ThinkExtraction thinkExtraction = extractThink(withLocation);
                 if (!thinkExtraction.think().isBlank() && settings.thinkTagToConsole()) {
